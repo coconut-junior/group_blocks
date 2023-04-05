@@ -3,14 +3,10 @@ var pages = doc.pages;
 
 var tolerance = 10; //in pixels
 
-app.activeDocument.groups.everyItem().ungroup(); //ungroup everything
+alert("Howdy partner, are you ready to wrangle some product blocks? 🤠");
 
-if(doc.viewPreferences.horizontalMeasurementUnits == MeasurementUnits.inches) {
-    tolerance = 0.2;
-}
-else if(doc.viewPreferences.horizontalMeasurementUnits = MeasurementUnits.pixels){
-    tolerance = 20;
-}
+GeneralPreference.ungroupRemembersLayers = false;
+app.activeDocument.groups.everyItem().ungroup(); //ungroup everything
 
 for(var p = 0;p<pages.length;++p) {
     collectAssets(p);
@@ -44,7 +40,8 @@ function collectAssets(pageIndex) {
             if(isColliding(element,whiteSpace)
             && !element.itemLayer.name.match('specs')
             && !element.locked
-            && element.itemLayer.visible
+            && element.visible
+            /*&& element.itemLayer.visible*/
             && (element.geometricBounds[3]-element.geometricBounds[1]) < ((doc.pages[0].bounds[3] - doc.pages[0].bounds[1]/2))/*exclude rectangles larger than product block*/
             && element.itemLayer == whiteSpace.itemLayer){
                 itemsToGroup.push(element);
@@ -70,6 +67,16 @@ function isColliding(child, parent) {
 
     var parentHeight = parentBounds[2] - parentBounds[0];
     var parentWidth = parentBounds[3] - parentBounds[1];
+
+    if(doc.viewPreferences.horizontalMeasurementUnits == MeasurementUnits.inches) {
+        tolerance = 0.1; //0.1 inches seems to be the sweet spot
+        if(child.graphics.length > 0) {
+            tolerance = 0.3;
+        }
+    }
+    else if(doc.viewPreferences.horizontalMeasurementUnits = MeasurementUnits.pixels){
+        tolerance = 20;
+    }
 
     if(childBounds[0] > parentBounds[0] - tolerance
     && childBounds[1] > parentBounds[1] - tolerance
